@@ -1,97 +1,121 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# GPlayer 🎵
 
-# Getting Started
+A minimalist, cloud-native music player for Android that streams your music library directly from your own Dropbox — no uploads to a third-party server, no local storage bloat, no ads.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Why GPlayer?
 
-## Step 1: Start Metro
+Most music apps either lock you into their catalog or eat up your phone's storage with downloaded files. GPlayer flips that: you keep your own music files in your own Dropbox, and the app streams them on demand. Your library, your storage, your rules.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **No local storage required** — songs stream directly from Dropbox
+- **No ads, ever**
+- **You own your files** — nothing is copied to a third-party server; GPlayer only reads what you already have in Dropbox
+- **Free to start** — works within Dropbox's free tier; pay Dropbox directly if you need more storage
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Features
 
-```sh
-# Using npm
-npm start
+- 🔐 Secure OAuth 2.0 sign-in via Dropbox (with PKCE)
+- ☁️ Automatic sync of audio files from your Dropbox
+- ▶️ Background playback with lock-screen and notification controls
+- 📱 Clean, dark-themed mobile UI
+- 💾 Fast local caching of metadata (not audio) for instant library loads
 
-# OR using Yarn
-yarn start
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | React Native (CLI, bare workflow) |
+| Language | TypeScript |
+| Auth | [react-native-app-auth](https://github.com/FormidableLabs/react-native-app-auth) (OAuth 2.0 + PKCE against Dropbox) |
+| Audio playback | [@rntp/player](https://github.com/doublesymmetry/react-native-track-player) (React Native Track Player) |
+| Local storage | [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv) (built on Nitro Modules) |
+| Navigation | [@react-navigation/native](https://reactnavigation.org/) |
+| Cloud storage | Dropbox API |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js and npm
+- A configured Android development environment (Android Studio, SDK, NDK) — see the [React Native environment setup guide](https://reactnative.dev/docs/set-up-your-environment)
+- A Dropbox account and a registered [Dropbox App](https://www.dropbox.com/developers/apps) with an OAuth 2.0 client
+
+### Installation
+
+```bash
+git clone https://github.com/Kalpit3344/GPlayer.git
+cd GPlayer
+npm install
 ```
 
-## Step 2: Build and run your app
+### Configuration
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+GPlayer authenticates against Dropbox's OAuth API. Update the config in `src/auth/dropboxAuth.ts` with your own Dropbox App's client ID and redirect scheme:
 
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```typescript
+const config: AuthConfiguration = {
+  clientId: 'YOUR_DROPBOX_APP_CLIENT_ID',
+  redirectUrl: 'com.yourapp://oauthredirect',
+  scopes: [],
+  serviceConfiguration: {
+    authorizationEndpoint: 'https://www.dropbox.com/oauth2/authorize',
+    tokenEndpoint: 'https://api.dropboxapi.com/oauth2/token',
+  },
+  usePKCE: true,
+};
 ```
 
-### iOS
+You'll also need to register the matching `appAuthRedirectScheme` manifest placeholder in `android/app/build.gradle`:
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```gradle
+manifestPlaceholders = [
+    appAuthRedirectScheme: 'com.yourapp'
+]
 ```
 
-Then, and every time you update your native dependencies, run:
+### Running the app
 
-```sh
-bundle exec pod install
+```bash
+npx react-native run-android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Make sure an emulator is running or a device is connected first.
 
-```sh
-# Using npm
-npm run ios
+### Building a release APK
 
-# OR using Yarn
-yarn ios
+```bash
+cd android
+./gradlew assembleRelease
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+The signed APK will be at `android/app/build/outputs/apk/release/app-release.apk`.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Project Structure
 
-## Step 3: Modify your app
+```
+GPlayer/
+├── android/              # Native Android project
+├── src/
+│   ├── auth/              # Dropbox OAuth logic
+│   ├── player/             # Track Player background service
+│   ├── screens/           # App screens (Login, Library, Now Playing, etc.)
+│   └── types/               # Shared TypeScript types
+├── App.tsx
+├── index.js
+└── app.json
+```
 
-Now that you have successfully run the app, let's make changes!
+## Roadmap
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- [ ] Playlist creation and management
+- [ ] Search and filter within library
+- [ ] Delta sync via Dropbox's changes API for faster refresh
+- [ ] Offline caching option for selected tracks
+- [ ] iOS support
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Contributing
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+This is currently a personal/learning project. Issues and suggestions are welcome via GitHub Issues.
 
-## Congratulations! :tada:
+## License
 
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+MIT
