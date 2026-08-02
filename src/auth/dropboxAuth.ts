@@ -7,7 +7,10 @@ const storage = createMMKV();
 const config: AuthConfiguration = {
   clientId: 'rzmzvxmicwqystw',
   redirectUrl: 'com.gplayer://oauthredirect',
-  scopes: [],
+  scopes: ['files.metadata.read', 'files.content.read'],
+  additionalParameters: {
+    token_access_type: 'offline',
+  },
   serviceConfiguration: {
     authorizationEndpoint: 'https://www.dropbox.com/oauth2/authorize',
     tokenEndpoint: 'https://api.dropboxapi.com/oauth2/token',
@@ -39,17 +42,29 @@ export async function getValidAccessToken(): Promise<string> {
   const tokens = getSavedTokens();
   if (!tokens) throw new Error('Not signed in');
 
-  const isExpired = new Date(tokens.accessTokenExpirationDate) <= new Date();
+  const expTime = tokens.accessTokenExpirationDate ? new Date(tokens.accessTokenExpirationDate).getTime() : 0;
+  const bufferMs = 60 * 1000;
+  const isExpired = Number.isNaN(expTime) || (expTime - bufferMs <= Date.now());
   if (!isExpired) return tokens.accessToken;
 
-  const refreshed = await refresh(config, { refreshToken: tokens.refreshToken });
-  const newTokens: AuthTokens = {
-    accessToken: refreshed.accessToken,
-    refreshToken: refreshed.refreshToken ?? tokens.refreshToken,
-    accessTokenExpirationDate: refreshed.accessTokenExpirationDate,
-  };
-  saveTokens(newTokens);
-  return newTokens.accessToken;
+  if (!tokens.refreshToken) {
+    signOut();
+    throw new Error('Session expired. Please sign in again.');
+  }
+
+  try {
+    const refreshed = await refresh(config, { refreshToken: tokens.refreshToken });
+    const newTokens: AuthTokens = {
+      accessToken: refreshed.accessToken,
+      refreshToken: refreshed.refreshToken ?? tokens.refreshToken,
+      accessTokenExpirationDate: refreshed.accessTokenExpirationDate,
+    };
+    saveTokens(newTokens);
+    return newTokens.accessToken;
+  } catch (err) {
+    signOut();
+    throw new Error('Session expired. Please sign in again.');
+  }
 }
 
 export function signOut() {

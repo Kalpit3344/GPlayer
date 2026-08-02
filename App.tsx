@@ -11,13 +11,11 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   useEffect(() => {
-    try {
-      setupPlayer();
-    } catch (err) {
+    setupPlayer().catch((err) => {
       // Fast Refresh can re-invoke this effect; setupPlayer() throws if
       // called twice, which is safe to ignore here.
-      console.log('Player setup skipped:', err);
-    }
+      console.log('Player setup skipped or failed:', err);
+    });
   }, []);
 
   return (
