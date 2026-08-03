@@ -79,7 +79,7 @@ jobs:
         run: ./gradlew bundleRelease --no-daemon
 
       - name: Upload Android artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-artifacts
           path: |
@@ -144,7 +144,7 @@ jobs:
 
       - name: Upload iOS artifacts
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-artifacts
           path: GPlayer.ipa
@@ -160,13 +160,13 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Download Android artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: android-artifacts
           path: android-build
 
       - name: Download iOS artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ios-artifacts
           path: ios-build
