@@ -34,7 +34,11 @@ export default function LibraryScreen() {
 
   useEffect(() => {
     setIsLoadingLibrary(true);
-    fetchLibrary().finally(() => setIsLoadingLibrary(false));
+    fetchLibrary().then(() => {
+      setIsLoadingLibrary(false);
+    }).catch(() => {
+      setIsLoadingLibrary(false);
+    });
   }, [fetchLibrary, setIsLoadingLibrary]);
 
   async function handleRefresh() {
