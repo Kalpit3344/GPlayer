@@ -58,7 +58,7 @@ export default function LibraryScreen() {
     const realIndex = library.findIndex((f) => f.id === file.id);
     try {
       await playQueue(library, realIndex >= 0 ? realIndex : 0);
-    } catch (err: any) {
+    } catch {
       Alert.alert('Playback Failed', 'Could not start playback. Please check your internet connection.');
     }
   }
@@ -67,7 +67,7 @@ export default function LibraryScreen() {
     try {
       TrackPlayer.clear();
       TrackPlayer.stop();
-    } catch (e) {
+    } catch {
       // Ignore if player reset encounters an issue
     }
     setLibrary([]);

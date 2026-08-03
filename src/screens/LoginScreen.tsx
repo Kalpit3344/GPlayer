@@ -17,7 +17,7 @@ export default function LoginScreen() {
     } else {
       setChecking(false);
     }
-  }, []);
+  }, [navigation]);
 
   async function handleSignIn() {
     setSigningIn(true);

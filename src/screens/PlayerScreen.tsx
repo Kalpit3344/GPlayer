@@ -71,7 +71,7 @@ export default function PlayerScreen() {
       <View style={styles.controlsSection}>
         <TouchableOpacity
           style={styles.skipBtn}
-          onPress={() => { try { TrackPlayer.skipToPrevious(); } catch (e) {} }}
+          onPress={() => { try { TrackPlayer.skipToPrevious(); } catch { } }}
           activeOpacity={0.7}
         >
           <SkipPrevIcon size={28} color="#F4F4F5" />
@@ -87,7 +87,7 @@ export default function PlayerScreen() {
 
         <TouchableOpacity
           style={styles.skipBtn}
-          onPress={() => { try { TrackPlayer.skipToNext(); } catch (e) {} }}
+          onPress={() => { try { TrackPlayer.skipToNext(); } catch { } }}
           activeOpacity={0.7}
         >
           <SkipNextIcon size={28} color="#F4F4F5" />

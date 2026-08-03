@@ -61,7 +61,7 @@ export async function getValidAccessToken(): Promise<string> {
     };
     saveTokens(newTokens);
     return newTokens.accessToken;
-  } catch (err) {
+  } catch {
     signOut();
     throw new Error('Session expired. Please sign in again.');
   }
