@@ -43,6 +43,7 @@ jobs:
     name: Build Android APK & AAB
     runs-on: ubuntu-latest
     needs: lint-and-test
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout repository
@@ -84,6 +85,7 @@ jobs:
     name: Build iOS IPA
     runs-on: macos-latest
     needs: lint-and-test
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout repository
@@ -98,10 +100,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install CocoaPods
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install CocoaPods (via Gemfile)
         run: |
           cd ios
-          pod install --repo-update
+          bundle exec pod install --repo-update
 
       # ponytail: unsigned build only — add signing/export-options when a cert
       # and provisioning profile land in secrets (needed for TestFlight installs)
@@ -141,6 +150,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-android, build-ios]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -158,19 +169,31 @@ jobs:
           name: ios-artifacts
           path: ios-build
 
+      - name: Locate Android APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK_PATH=$(find android-build -type f -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found under android-build"
+            find android-build -maxdepth 5 -type f | sort || true
+            exit 1
+          fi
+          echo "APK_PATH=$APK_PATH" >> "$GITHUB_ENV"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            android-build/apk/release/app-release.apk
+            ${{ env.APK_PATH }}
             ios-build/GPlayer.ipa
           body: |
             ## 🎉 GPlayer Release ${{ github.ref_name }}
-            
+
             ### 📦 Artifacts
             - **Android APK**: app-release.apk
             - **iOS IPA**: GPlayer.ipa
-            
+
             ### ✅ Build Status
             - ✅ Linting passed
             - ✅ Tests passed
