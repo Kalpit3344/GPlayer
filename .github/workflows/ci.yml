@@ -138,8 +138,15 @@ jobs:
       - name: Create IPA
         if: startsWith(github.ref, 'refs/tags/')
         run: |
+          APP_DIR="ios/build/Build/Products/Release-iphoneos/GPlayer.app"
+          if [ ! -d "$APP_DIR" ]; then
+            echo "ERROR: iOS app not found at expected path: $APP_DIR"
+            echo "Available build products:"
+            find ios/build -maxdepth 6 -type d -name "*.app" || true
+            exit 1
+          fi
           mkdir -p Payload
-          cp -r ios/build/Release-iphoneos/GPlayer.app Payload/
+          cp -r "$APP_DIR" Payload/
           zip -r GPlayer.ipa Payload/
 
       - name: Upload iOS artifacts
