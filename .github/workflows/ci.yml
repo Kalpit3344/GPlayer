@@ -74,17 +74,11 @@ jobs:
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon
 
-      - name: Build Android release AAB
-        working-directory: android
-        run: ./gradlew bundleRelease --no-daemon
-
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android-artifacts
-          path: |
-            android/app/build/outputs/apk/release/
-            android/app/build/outputs/bundle/release/
+          path: android/app/build/outputs/apk/release/
 
   build-ios:
     name: Build iOS IPA
@@ -169,14 +163,12 @@ jobs:
         with:
           files: |
             android-build/apk/release/app-release.apk
-            android-build/bundle/release/app-release.aab
             ios-build/GPlayer.ipa
           body: |
             ## 🎉 GPlayer Release ${{ github.ref_name }}
             
             ### 📦 Artifacts
             - **Android APK**: app-release.apk
-            - **Android AAB**: app-release.aab
             - **iOS IPA**: GPlayer.ipa
             
             ### ✅ Build Status
